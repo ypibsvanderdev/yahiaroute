@@ -74,7 +74,7 @@ export default async function handler(req, res) {
 
     // 2. Direct Gemini Key
     if (geminiKey && (model?.provider === 'Google' || !openrouterKey)) {
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(geminiKey)}`;
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(geminiKey)}`;
       const gResp = await fetch(geminiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

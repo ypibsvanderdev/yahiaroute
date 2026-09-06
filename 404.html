@@ -778,7 +778,7 @@
           // Priority 1: Google Gemini (if user provided Gemini key and model is Google)
           if (keys.value.gemini && (model.provider === 'Google' || !keys.value.openrouter)) {
             try {
-              const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(keys.value.gemini);
+              const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(keys.value.gemini);
               const resp = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
