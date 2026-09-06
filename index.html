@@ -568,6 +568,7 @@
         const isPrivateChatThinking = ref(false);
         const privateChats = ref({});
         const chatScrollContainer = ref(null);
+        const hasServerBackend = ref(false);
 
         const keys = ref({
           openrouter: '',
@@ -626,14 +627,18 @@
 
             const savedChats = localStorage.getItem('yahiaroute_private_chats');
             if (savedChats) privateChats.value = JSON.parse(savedChats);
+            fetch('/api/ai').then(r => r.json()).then(d => {
+              if (d && d.hasServerKeys) hasServerBackend.value = true;
+            }).catch(() => {});
           } catch(e) {}
         });
 
         const hasActiveKey = computed(() => {
-          return Boolean(keys.value.gemini || keys.value.groq || keys.value.openrouter || keys.value.openai || keys.value.deepseek);
+          return hasServerBackend.value || Boolean(keys.value.gemini || keys.value.groq || keys.value.openrouter || keys.value.openai || keys.value.deepseek);
         });
 
         const activeKeyName = computed(() => {
+          if (hasServerBackend.value) return 'Vercel Secured';
           if (keys.value.gemini) return 'Gemini Cloud';
           if (keys.value.groq) return 'Groq Cloud';
           if (keys.value.openrouter) return 'OpenRouter';
@@ -758,6 +763,18 @@
 
         // --- LIVE CLOUD LLM CALLER ---
         const callLiveAI = async (model, prompt, systemPrompt) => {
+          // Priority 0: Vercel Serverless Backend (hidden server keys)
+          try {
+            const serverResp = await fetch('/api/ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ model, prompt, systemPrompt })
+            });
+            if (serverResp.ok) {
+              const sData = await serverResp.json();
+              if (sData.content) return sData.content;
+            }
+          } catch(e) {}
           // Priority 1: Google Gemini (if user provided Gemini key and model is Google)
           if (keys.value.gemini && (model.provider === 'Google' || !keys.value.openrouter)) {
             try {
